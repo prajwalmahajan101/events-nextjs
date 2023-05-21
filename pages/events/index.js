@@ -4,6 +4,7 @@ import { getAllEvents } from "@/helper/api-helper";
 import { useRouter } from "next/router";
 
 const EventsPage = ({ allEvents }) => {
+	const router = useRouter();
 	const filterHandler = (year, month) => {
 		const new_route = `/events/${year}/${month}`;
 		router.push(new_route);
