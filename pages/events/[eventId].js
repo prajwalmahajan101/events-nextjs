@@ -3,6 +3,7 @@ import EventLogistics from "@/components/event-detail/event-logistics";
 import EventSummary from "@/components/event-detail/event-summary";
 import ErrorAlert from "@/components/ui/error-alert";
 import { getEventById, getFeaturedEvents } from "@/helper/api-helper";
+import Head from "next/head";
 // import { useRouter } from "next/router";
 import { Fragment } from "react";
 const EventDetailsPage = ({ event }) => {
@@ -18,6 +19,10 @@ const EventDetailsPage = ({ event }) => {
 	}
 	return (
 		<Fragment>
+			<Head>
+				<title>{event.title}</title>
+				<meta name="description" content={event.description} />
+			</Head>
 			<EventSummary title={event.title} />
 			<EventLogistics
 				date={event.date}
