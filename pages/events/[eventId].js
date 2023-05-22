@@ -4,6 +4,7 @@ import EventSummary from "@/components/event-detail/event-summary";
 import ErrorAlert from "@/components/ui/error-alert";
 import { getEventById, getFeaturedEvents } from "@/helper/api-helper";
 import Head from "next/head";
+import Comments from "@/components/input/comments";
 // import { useRouter } from "next/router";
 import { Fragment } from "react";
 const EventDetailsPage = ({ event }) => {
@@ -33,6 +34,7 @@ const EventDetailsPage = ({ event }) => {
 			<EventContent>
 				<p>{event.description}</p>
 			</EventContent>
+			<Comments eventId={event.id} />
 		</Fragment>
 	);
 };
