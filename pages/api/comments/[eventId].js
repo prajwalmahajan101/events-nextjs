@@ -1,45 +1,44 @@
-const handler = (req, res) => {
+import { MongoClient } from "mongodb";
+
+const handler = async (req, res) => {
 	const { method } = req;
 	const { eventId } = req.query;
-	if (method === "POST") {
-		const { email, name, text } = req.body;
-		if (
-			!email ||
-			!email.includes("@") ||
-			!name ||
-			name.trim() === "" ||
-			!text ||
-			text.trim() === ""
-		) {
-			return res.status(422).json({
-				message: "One or more inputs are invalid",
-			});
+	try {
+		const client = await MongoClient.connect(process.env.DB_URL);
+		const commentCollection = client.db().collection("comments");
+		if (method === "POST") {
+			const { email, name, text } = req.body;
+			if (
+				!email ||
+				!email.includes("@") ||
+				!name ||
+				name.trim() === "" ||
+				!text ||
+				text.trim() === ""
+			) {
+				return res.status(422).json({
+					message: "One or more inputs are invalid",
+				});
+			}
+			const new_comment = {
+				email,
+				name,
+				text,
+				eventId,
+			};
+			let result = await commentCollection.insertOne(new_comment);
+			client.close();
+			return res.status(201).json(new_comment);
+		} else if (method === "GET") {
+			const comments = await commentCollection
+				.find({ eventId })
+				.sort({ _id: -1 })
+				.toArray();
+			client.close();
+			return res.status(200).json({ comments });
 		}
-		const new_comment = {
-			id: new Date().toISOString(),
-			email,
-			name,
-			text,
-		};
-		console.log(new_comment);
-		return res.status(201).json(new_comment);
-	} else if (method === "GET") {
-		const dummyList = [
-			{
-				id: "c1",
-				name: "Prajwal",
-				email: "prajwal@test.com",
-				text: "A Dummy comments",
-			},
-			{
-				id: "c2",
-				name: "Prajwal_1",
-				email: "prajwal_!@test.com",
-				text: "A Dummy comments part-2",
-			},
-		];
-
-		return res.status(200).json({ comments: dummyList });
+	} catch (err) {
+		console.log(err);
 	}
 };
 export default handler;
