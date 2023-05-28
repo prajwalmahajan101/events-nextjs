@@ -3,32 +3,71 @@ import { useEffect, useState } from "react";
 import CommentList from "./comment-list";
 import NewComment from "./new-comment";
 import classes from "@/styles/comments.module.css";
+import useNotification from "@/hooks/useNotification";
+
+import ClipLoader from "react-spinners/ClipLoader";
 
 function Comments(props) {
 	const { eventId } = props;
+	const { showNotification } = useNotification();
 
 	const [showComments, setShowComments] = useState(false);
-	const [comments,setComments] = useState([]);
+	const [comments, setComments] = useState([]);
+	const [loading, setLoading] = useState(false);
 
-	useEffect(()=>{
-		if(showComments){
-			fetch(`/api/comments/${eventId}`).then(res=>res.json()).then(data=>setComments(data.comments)).catch(err=>console.log(err))
+	useEffect(() => {
+		if (showComments) {
+			setLoading(true);
+			fetch(`/api/comments/${eventId}`)
+				.then((res) => res.json())
+				.then((data) => {
+					setComments(data.comments);
+					setLoading(false);
+				})
+				.catch((err) => console.log(err));
 		}
-	},[showComments])
+	}, [showComments]);
 	function toggleCommentsHandler() {
 		setShowComments((prevStatus) => !prevStatus);
 	}
 
 	function addCommentHandler(commentData) {
 		// send data to API
-		fetch(`/api/comments/${eventId}`,{
-			method:"POST",
-			body:JSON.stringify(commentData),
-			headers:{
-				"Content-type" : "application/json"
-			}
-		}).then(res=>res.json()).then(data=>console.log(data)).catch(err=>console.log(err))
-
+		showNotification({
+			title: "Posting the comment ....",
+			message: "Your Comments is being posted",
+			status: "pending",
+		});
+		fetch(`/api/comments/${eventId}`, {
+			method: "POST",
+			body: JSON.stringify(commentData),
+			headers: {
+				"Content-type": "application/json",
+			},
+		})
+			.then((res) => {
+				if (res.ok) {
+					return res.json();
+				}
+				return res.json().then((data) => {
+					throw new Error(data.message || "Something went wrong");
+				});
+			})
+			.then((data) => {
+				setComments((prevState) => [data, ...prevState]);
+				showNotification({
+					title: "Comment Posted",
+					message: "Your Comment is Posted",
+					status: "success",
+				});
+			})
+			.catch((err) =>
+				showNotification({
+					title: "Error!",
+					message: err.message || "Something went wrong",
+					status: "error",
+				})
+			);
 	}
 
 	return (
@@ -37,7 +76,16 @@ function Comments(props) {
 				{showComments ? "Hide" : "Show"} Comments
 			</button>
 			{showComments && <NewComment onAddComment={addCommentHandler} />}
-			{showComments && <CommentList items={comments}/>}
+			{!loading && showComments && <CommentList items={comments} />}
+			{showComments && loading && (
+				<ClipLoader
+					color={"black"}
+					loading={loading}
+					size={150}
+					aria-label="Loading Spinner"
+					data-testid="loader"
+				/>
+			)}
 		</section>
 	);
 }
