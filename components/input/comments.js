@@ -5,7 +5,13 @@ import NewComment from "./new-comment";
 import classes from "@/styles/comments.module.css";
 import useNotification from "@/hooks/useNotification";
 
-import ClipLoader from "react-spinners/ClipLoader";
+import ClimbingBoxLoader from "react-spinners/ClimbingBoxLoader";
+
+const overide = {
+	display: "block",
+	margin: "150px auto",
+	borderColor: "black",
+};
 
 function Comments(props) {
 	const { eventId } = props;
@@ -78,10 +84,11 @@ function Comments(props) {
 			{showComments && <NewComment onAddComment={addCommentHandler} />}
 			{!loading && showComments && <CommentList items={comments} />}
 			{showComments && loading && (
-				<ClipLoader
-					color={"black"}
+				<ClimbingBoxLoader
+					color={"#03be9f"}
+					cssOverride={overide}
 					loading={loading}
-					size={150}
+					size={50}
 					aria-label="Loading Spinner"
 					data-testid="loader"
 				/>
